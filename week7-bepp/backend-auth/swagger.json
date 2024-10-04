@@ -1,0 +1,249 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User and Jobs API",
+    "description": "API for managing users and jobs, some routes are publicly accessible.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/api",
+      "description": "Local server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" },
+          "phone_number": { "type": "string" },
+          "gender": { "type": "string" },
+          "date_of_birth": { "type": "string", "format": "date" },
+          "membership_status": { "type": "string" }
+        },
+        "required": ["name", "email", "password", "phone_number", "gender", "date_of_birth", "membership_status"]
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "type": { "type": "string" },
+          "description": { "type": "string" },
+          "company": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "contactEmail": { "type": "string", "format": "email" },
+              "contactPhone": { "type": "string" }
+            },
+            "required": ["name", "contactEmail", "contactPhone"]
+          }
+        },
+        "required": ["title", "type", "description", "company"]
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        },
+        "required": ["email", "password"]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/users/login": {
+      "post": {
+        "summary": "Login a user",
+        "security": [],  
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Login" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful, returns token",
+            "content": {
+              "application/json": {
+                "example": { "email": "user@example.com", "token": "jwt-token" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/users/signup": {
+      "post": {
+        "summary": "Sign up a new user",
+        "security": [],  
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/User" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created and returns token",
+            "content": {
+              "application/json": {
+                "example": { "email": "user@example.com", "token": "jwt-token" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user data"
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "summary": "Get all jobs",
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Job" }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Job" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Job" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/jobs/{jobId}": {
+      "get": {
+        "summary": "Get job by ID",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Job" }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update job by ID",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Job" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Job" }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete job by ID",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Job deleted successfully"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    }
+  }
+}
